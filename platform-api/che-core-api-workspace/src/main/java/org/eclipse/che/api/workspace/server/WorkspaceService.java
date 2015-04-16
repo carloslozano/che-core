@@ -168,7 +168,7 @@ public class WorkspaceService extends Service {
         if (newWorkspace.getAttributes() != null) {
             validateAttributes(newWorkspace.getAttributes());
         }
-        if (newWorkspace.getName() == null || newWorkspace.getName().isEmpty()) {
+        if (newWorkspace.getName() == null || newWorkspace.getName().isEmpty() || workspaceExists(newWorkspace.getName())) {
             newWorkspace.setName(generateWorkspaceName());
         }
         final Account account = accountDao.getById(newWorkspace.getAccountId());

@@ -170,14 +170,9 @@ public class AccountService extends Service {
             }
         }
 
-        try {
-            accountDao.getByName(newAccount.getName());
-            throw new ConflictException(format("Account with name %s already exists", newAccount.getName()));
-        } catch (NotFoundException ignored) {
-        }
+        newAccount.setName(generateAccountName());
         final String accountId = NameGenerator.generate(Account.class.getSimpleName().toLowerCase(), Constants.ID_LENGTH);
         final Account account = new Account().withId(accountId)
-                                             .withName(newAccount.getName())
                                              .withAttributes(newAccount.getAttributes());
 
         accountDao.create(account);
@@ -1324,5 +1319,36 @@ public class AccountService extends Service {
             LOG.error(e.getLocalizedMessage(), e);
         }
         LOG.info("Subscription scheduler test is finished");
+    }
+
+    private String generateAccountName() throws ServerException {
+        //should be email
+        String userName = currentUser().getName();
+
+        int atIdx = userName.indexOf('@');
+        //if username contains email then fetch part before '@'
+        if (atIdx != -1) {
+            userName = userName.substring(0, atIdx);
+        }
+        //search first account name which is free
+        int suffix = 2;
+        String accountName = userName;
+        while (accountExists(accountName)) {
+            accountName = userName + suffix++;
+        }
+        return accountName;
+    }
+
+    private boolean accountExists(String name) throws ServerException {
+        try {
+            accountDao.getByName(name);
+        } catch (NotFoundException nfEx) {
+            return false;
+        }
+        return true;
+    }
+
+    private org.eclipse.che.commons.user.User currentUser() {
+        return EnvironmentContext.getCurrent().getUser();
     }
 }
