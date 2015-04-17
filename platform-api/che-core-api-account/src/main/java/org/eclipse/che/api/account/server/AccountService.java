@@ -170,9 +170,9 @@ public class AccountService extends Service {
             }
         }
 
-        newAccount.setName(generateAccountName());
         final String accountId = NameGenerator.generate(Account.class.getSimpleName().toLowerCase(), Constants.ID_LENGTH);
         final Account account = new Account().withId(accountId)
+                                             .withName(generateAccountName())
                                              .withAttributes(newAccount.getAttributes());
 
         accountDao.create(account);
