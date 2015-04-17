@@ -72,6 +72,7 @@ import java.util.List;
 import java.util.Map;
 
 import static java.lang.Boolean.parseBoolean;
+import static java.lang.String.format;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonMap;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
@@ -168,8 +169,10 @@ public class WorkspaceService extends Service {
         if (newWorkspace.getAttributes() != null) {
             validateAttributes(newWorkspace.getAttributes());
         }
-        if (newWorkspace.getName() == null || newWorkspace.getName().isEmpty() || workspaceExists(newWorkspace.getName())) {
+        if (newWorkspace.getName() == null || newWorkspace.getName().isEmpty()) {
             newWorkspace.setName(generateWorkspaceName());
+        } else if (workspaceExists(newWorkspace.getName())) {
+            throw new ConflictException(format("Workspace with name %s already exists", newWorkspace.getName()));
         }
         final Account account = accountDao.getById(newWorkspace.getAccountId());
 
