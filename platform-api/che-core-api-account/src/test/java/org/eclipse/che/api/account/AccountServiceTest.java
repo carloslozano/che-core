@@ -247,7 +247,7 @@ public class AccountServiceTest {
     @Test
     public void shouldBeAbleToCreateAccount() throws Exception {
         when(userDao.getByAlias(USER_EMAIL)).thenReturn(user);
-        when(accountDao.getByName(account.getName())).thenThrow(new NotFoundException("Account not found"));
+        when(accountDao.getByName(anyString())).thenThrow(new NotFoundException("Account not found"));
         when(accountDao.getByOwner(USER_ID)).thenReturn(Collections.<Account>emptyList());
         String role = "user";
         prepareSecurityContext(role);
@@ -280,20 +280,6 @@ public class AccountServiceTest {
 
         ContainerResponse response = makeRequest(HttpMethod.POST, SERVICE_PATH, MediaType.APPLICATION_JSON, account);
         assertEquals(response.getEntity().toString(), "Account which owner is " + USER_ID + " already exists");
-    }
-
-    @Test
-    public void shouldNotBeAbleToCreateAccountWithoutName() throws Exception {
-        when(userDao.getByAlias(USER_EMAIL)).thenReturn(user);
-        when(accountDao.getByName(account.getName())).thenReturn(null);
-        when(accountDao.getByOwner(USER_ID)).thenReturn(Collections.<Account>emptyList());
-        account.setName(null);
-        String role = "user";
-        prepareSecurityContext(role);
-
-        ContainerResponse response = makeRequest(HttpMethod.POST, SERVICE_PATH, MediaType.APPLICATION_JSON, account);
-
-        assertEquals(response.getEntity().toString(), "Account name required");
     }
 
     @Test

@@ -186,10 +186,11 @@ public class WorkspaceServiceTest {
     public void shouldBeAbleToCreateFirstWorkspace() throws Exception {
         //create new account with empty workspace list
         final Account testAccount = createAccount();
-        when(workspaceDao.getByAccount(testAccount.getId())).thenReturn(Collections.<Workspace>emptyList());
         //new workspace descriptor
         final NewWorkspace newWorkspace = newDTO(NewWorkspace.class).withName("new_workspace")
                                                                     .withAccountId(testAccount.getId());
+        when(workspaceDao.getByAccount(testAccount.getId())).thenReturn(Collections.<Workspace>emptyList());
+        when(workspaceDao.getByName(newWorkspace.getName())).thenThrow(new NotFoundException("not found"));
 
         final WorkspaceDescriptor descriptor = doPost(SERVICE_PATH, newWorkspace, CREATED);
 
@@ -241,6 +242,7 @@ public class WorkspaceServiceTest {
                                                                     .withAccountId("fake_account_id");
 
         when(accountDao.getByOwner(testUser.getId())).thenReturn(new ArrayList<Account>());
+        when(workspaceDao.getByName(newWorkspace.getName())).thenThrow(new NotFoundException("not found"));
 
         final String errorJson = doPost(SERVICE_PATH, newWorkspace, CONFLICT);
 
@@ -250,10 +252,11 @@ public class WorkspaceServiceTest {
     @Test
     public void shouldBeAbleToCreateMultiWorkspaces() throws Exception {
         final Account testAccount = createAccount();
-        when(workspaceDao.getByAccount(testAccount.getId())).thenReturn(singletonList(new Workspace()));
         //new workspace descriptor
         final NewWorkspace newWorkspace = newDTO(NewWorkspace.class).withName("test_workspace")
                                                                     .withAccountId(testAccount.getId());
+        when(workspaceDao.getByAccount(testAccount.getId())).thenReturn(singletonList(new Workspace()));
+        when(workspaceDao.getByName(newWorkspace.getName())).thenThrow(new NotFoundException("not found"));
 
         final WorkspaceDescriptor descriptor = doPost(SERVICE_PATH, newWorkspace, CREATED);
 

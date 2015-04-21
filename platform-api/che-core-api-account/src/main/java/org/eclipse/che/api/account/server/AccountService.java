@@ -81,6 +81,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 
 import static java.lang.String.format;
@@ -155,7 +156,6 @@ public class AccountService extends Service {
                                                                    ConflictException,
                                                                    ServerException {
         requiredNotNull(newAccount, "New account");
-        requiredNotNull(newAccount.getName(), "Account name");
         if (newAccount.getAttributes() != null) {
             for (String attributeName : newAccount.getAttributes().keySet()) {
                 validateAttributeName(attributeName);
@@ -1322,19 +1322,18 @@ public class AccountService extends Service {
     }
 
     private String generateAccountName() throws ServerException {
-        //should be email
-        String userName = currentUser().getName();
-
-        int atIdx = userName.indexOf('@');
-        //if username contains email then fetch part before '@'
-        if (atIdx != -1) {
-            userName = userName.substring(0, atIdx);
+        int leftLimit = 97; // letter 'a'
+        int rightLimit = 122; // letter 'z'
+        int targetStringLength = 10;
+        StringBuilder buffer = new StringBuilder(targetStringLength);
+        for (int i = 0; i < targetStringLength; i++) {
+            int randomLimitedInt = leftLimit + (int) (new Random().nextFloat() * (rightLimit - leftLimit));
+            buffer.append((char) randomLimitedInt);
         }
-        //search first account name which is free
-        int suffix = 2;
-        String accountName = userName;
-        while (accountExists(accountName)) {
-            accountName = userName + suffix++;
+
+        String accountName = buffer.toString();
+        if (accountExists(accountName)) {
+            accountName = generateAccountName();
         }
         return accountName;
     }
@@ -1346,9 +1345,5 @@ public class AccountService extends Service {
             return false;
         }
         return true;
-    }
-
-    private org.eclipse.che.commons.user.User currentUser() {
-        return EnvironmentContext.getCurrent().getUser();
     }
 }
